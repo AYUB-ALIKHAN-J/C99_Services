@@ -13,3 +13,4 @@ google-auth
 pydantic-settings
 asyncpg
 loguru
+slowapi
