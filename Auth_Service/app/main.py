@@ -42,7 +42,6 @@ async def on_startup():
         await conn.run_sync(Base.metadata.create_all)
     logger.success("Startup complete.")
 
-# Rate Limiting: Protect endpoints from brute-force attacks.
 
 # Email Confirmation: Add email verification for registration.
 

@@ -16,12 +16,13 @@ class UserLogin(BaseModel):
     password: constr(min_length=8, max_length=128)
 
 class UserOut(BaseModel):
-    id:int
-    email:EmailStr
-    role:UserRole
+    id: int
+    email: EmailStr
+    role: UserRole
+    is_verified: bool
 
     class Config:
-        orm_model =True
+        orm_mode = True
 class Token(BaseModel):
     access_token:str
     token_type :str ="bearer"
