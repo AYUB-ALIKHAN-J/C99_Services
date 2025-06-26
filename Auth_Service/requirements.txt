@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy>=2.0
+psycopg2-binary
+alembic
+python-dotenv
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
+pytest
+httpx
+google-auth
+pydantic-settings
+asyncpg
+loguru
