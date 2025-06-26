@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from typing import List
 
 class Settings(BaseSettings):
     POSTGRES_USER: str
@@ -9,6 +10,13 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    BACKEND_CORS_ORIGINS: str = "*"  # default as string
+
+    @property
+    def cors_origins(self) -> List[str]:
+        if self.BACKEND_CORS_ORIGINS == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",")]
 
     class Config:
         env_file = ".env"
