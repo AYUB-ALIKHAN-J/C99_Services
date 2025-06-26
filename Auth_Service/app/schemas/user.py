@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,constr
 from enum import Enum
 
 class UserRole(str,Enum):
@@ -8,8 +8,12 @@ class UserRole(str,Enum):
 
 class UserCreate(BaseModel):
     email: EmailStr
-    password:str
+    password:constr(min_length=8, max_length=128)
     role: UserRole = UserRole.user
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: constr(min_length=8, max_length=128)
 
 class UserOut(BaseModel):
     id:int

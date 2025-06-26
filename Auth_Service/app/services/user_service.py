@@ -5,6 +5,10 @@ from app.schemas.user import UserCreate
 from app.core.security import get_password_hash
 from loguru import logger
 
+# Set loguru log color to magenta (closest to violet)
+logger.remove()
+logger.add(lambda msg: print(msg, end=""), colorize=True, format="<magenta>{time:YYYY-MM-DD HH:mm:ss}</magenta> | <magenta>{level}</magenta> | <magenta>{message}</magenta>")
+
 async def get_user_by_email(db:AsyncSession,email:str):
     logger.info(f"Looking up user by email: {email}")
     result = await db.execute(select(User).where(User.email==email))
@@ -19,6 +23,6 @@ async def create_user(db:AsyncSession,user_in:UserCreate):
     db.add(user)
     await db.commit()
     await db.refresh(user)
-    logger.info(f"User created: {user.id}")
+    logger.success(f"User created: {user.id}")
     return user
 
