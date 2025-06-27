@@ -20,3 +20,4 @@ class User(Base):
     created_at = Column(DateTime ,default = datetime.utcnow)
     is_verified = Column(Boolean, default=False, nullable=False)
     verification_code = Column(String, nullable=True)
+    password_reset_code = Column(String, nullable=True)

@@ -37,3 +37,16 @@ async def set_verification_code(db: AsyncSession, user: User, code: str):
 def generate_verification_code(length=6):
     return ''.join(random.choices(string.digits, k=length))
 
+async def set_password_reset_code(db: AsyncSession, user: User, code: str):
+    user.password_reset_code = code
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+async def reset_user_password(db: AsyncSession, user: User, new_password: str):
+    user.hashed_password = get_password_hash(new_password)
+    user.password_reset_code = None
+    await db.commit()
+    await db.refresh(user)
+    return user
+

@@ -1,8 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.user import UserCreate, UserOut, Token, UserLogin, EmailVerification
-from app.services.user_service import create_user, get_user_by_email, set_verification_code, generate_verification_code
-from app.services.email_service import send_verification_code_email
+from app.schemas.user import (
+    UserCreate, UserOut, Token, UserLogin, EmailVerification,
+    PasswordResetRequest, PasswordReset
+)
+from app.services.user_service import (
+    create_user, get_user_by_email, set_verification_code, generate_verification_code,
+    set_password_reset_code, reset_user_password
+)
+from app.services.email_service import (
+    send_verification_code_email, send_password_reset_code_email
+)
 from app.core.security import verify_password, create_access_token
 from app.core.database import get_db
 from loguru import logger
@@ -55,3 +63,25 @@ async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db), request:
     token = create_access_token({"sub": str(user.id), "role": user.role})
     logger.success(f"Login successful for: {user_in.email}")
     return Token(access_token=token)
+
+@router.post("/request-password-reset")
+async def request_password_reset(data: PasswordResetRequest, db: AsyncSession = Depends(get_db)):
+    user = await get_user_by_email(db, data.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    code = generate_verification_code()
+    await set_password_reset_code(db, user, code)
+    send_password_reset_code_email(user.email, code)
+    logger.info(f"Password reset code sent to {user.email}")
+    return {"message": "Password reset code sent to your email."}
+
+@router.post("/reset-password")
+async def reset_password(data: PasswordReset, db: AsyncSession = Depends(get_db)):
+    user = await get_user_by_email(db, data.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.password_reset_code != data.code:
+        raise HTTPException(status_code=400, detail="Invalid reset code")
+    await reset_user_password(db, user, data.new_password)
+    logger.success(f"Password reset for {user.email}")
+    return {"message": "Password has been reset successfully."}

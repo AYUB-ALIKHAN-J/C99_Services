@@ -30,3 +30,11 @@ class Token(BaseModel):
 class EmailVerification(BaseModel):
     email: EmailStr
     code: str
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordReset(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: constr(min_length=8, max_length=128)

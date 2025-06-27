@@ -45,3 +45,21 @@ def send_verification_code_email(to_email: str, code: str):
         logger.success(f"Verification code email sent to {to_email}")
     except Exception as e:
         logger.error(f"Failed to send email to {to_email}: {e}")
+
+def send_password_reset_code_email(to_email: str, code: str):
+    """
+    Send a password reset code email to the user.
+    """
+    msg = EmailMessage()
+    msg['Subject'] = 'Your Password Reset Code'
+    msg['From'] = GMAIL_USER
+    msg['To'] = to_email
+    msg.set_content(f"Your password reset code is: {code}")
+
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+            smtp.send_message(msg)
+        logger.success(f"Password reset code email sent to {to_email}")
+    except Exception as e:
+        logger.error(f"Failed to send password reset email to {to_email}: {e}")
