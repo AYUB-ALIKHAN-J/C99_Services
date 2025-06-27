@@ -1,4 +1,4 @@
-from sqlalchemy import Column ,Integer ,String , DateTime ,Enum
+from sqlalchemy import Column ,Integer ,String , DateTime ,Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 import enum 
 from datetime import datetime
@@ -18,4 +18,5 @@ class User(Base):
     hashed_password =Column(String , nullable = False)
     role = Column(Enum(UserRole),default=UserRole.user , nullable =False)
     created_at = Column(DateTime ,default = datetime.utcnow)
-    
+    is_verified = Column(Boolean, default=False, nullable=False)
+    verification_code = Column(String, nullable=True)

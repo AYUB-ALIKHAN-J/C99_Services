@@ -34,7 +34,7 @@ app.add_middleware(
 # Routers
 app.include_router(auth.router)
 
-# Create tables on startup (for dev only; use Alembic for prod)
+# Create tables on startup (for dev only; use Alembic for  prod)
 @app.on_event("startup")
 async def on_startup():
     logger.info("Starting up and creating tables if needed...")
@@ -42,8 +42,6 @@ async def on_startup():
         await conn.run_sync(Base.metadata.create_all)
     logger.success("Startup complete.")
 
-
-# Email Confirmation: Add email verification for registration.
 
 # Password Reset: Implement password reset flow.
 

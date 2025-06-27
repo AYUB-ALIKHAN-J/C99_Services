@@ -25,3 +25,16 @@ def decode_access_token(token:str):
         return payload
     except JWTError:
         return None
+
+def create_email_confirmation_token(user_id: int, secret_key: str, expires_in: int = 3600):
+    expire = datetime.utcnow() + timedelta(seconds=expires_in)
+    to_encode = {"user_id": user_id,"exp": expire}
+    encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=Settings.ALGORITHM)
+    return encoded_jwt
+
+def verify_email_confirmation_token(token: str, secret_key: str):
+    try:
+        payload = jwt.decode(token, secret_key, algorithms=[Settings.ALGORITHM])
+        return payload.get("user_id")
+    except JWTError:
+        return None

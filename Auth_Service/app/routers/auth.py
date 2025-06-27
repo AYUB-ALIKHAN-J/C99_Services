@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.user import UserCreate, UserOut, Token, UserLogin
-from app.services.user_service import create_user, get_user_by_email
+from app.schemas.user import UserCreate, UserOut, Token, UserLogin, EmailVerification
+from app.services.user_service import create_user, get_user_by_email, set_verification_code, generate_verification_code
+from app.services.email_service import send_verification_code_email
 from app.core.security import verify_password, create_access_token
 from app.core.database import get_db
 from loguru import logger
@@ -18,13 +19,30 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @limiter.limit("5/minute")
 async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db), request: Request = None):
     logger.info(f"Register endpoint called for: {user_in.email}")
-    existing = await get_user_by_email(db , user_in.email)
+    existing = await get_user_by_email(db, user_in.email)
     if existing:
         logger.warning(f"Email already registered: {user_in.email}")
-        raise HTTPException(status_code=400 ,detail="Email already register")
-    user = await create_user(db ,user_in)
-    logger.success(f"User registered: {user.email}")
+        raise HTTPException(status_code=400, detail="Email already register")
+    user = await create_user(db, user_in)
+    code = generate_verification_code()
+    await set_verification_code(db, user, code)
+    send_verification_code_email(user.email, code)
+    logger.success(f"User registered: {user.email}, verification code sent.")
     return user
+
+@router.post("/verify-email")
+async def verify_email(data: EmailVerification, db: AsyncSession = Depends(get_db)):
+    user = await get_user_by_email(db, data.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.is_verified:
+        return {"message": "Email already verified."}
+    if user.verification_code != data.code:
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+    user.is_verified = True
+    user.verification_code = None
+    await db.commit()
+    return {"message": "Email verified successfully."}
 
 @router.post("/login", response_model=Token)
 @limiter.limit("10/minute")

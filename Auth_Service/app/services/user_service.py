@@ -4,6 +4,8 @@ from app.models.user import User, UserRole
 from app.schemas.user import UserCreate
 from app.core.security import get_password_hash
 from loguru import logger
+import random
+import string
 
 # Set loguru log color to magenta (closest to violet)
 logger.remove()
@@ -25,4 +27,13 @@ async def create_user(db:AsyncSession,user_in:UserCreate):
     await db.refresh(user)
     logger.success(f"User created: {user.id}")
     return user
+
+async def set_verification_code(db: AsyncSession, user: User, code: str):
+    user.verification_code = code
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+def generate_verification_code(length=6):
+    return ''.join(random.choices(string.digits, k=length))
 

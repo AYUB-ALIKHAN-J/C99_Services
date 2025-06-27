@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     BACKEND_CORS_ORIGINS: str = "*"  # default as string
+    GMAIL_USER: str
+    GMAIL_APP_PASSWORD: str
 
     @property
     def cors_origins(self) -> List[str]:
